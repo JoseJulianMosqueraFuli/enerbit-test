@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from datetime import datetime
 from models import WorkOrder, Customer
 from schemas import schemas
+from tasks import redis_client
 import uuid
 
 
@@ -99,6 +100,19 @@ def finish(id, db: Session):
     order.update({"status": "done"})
 
     db.commit()
+
+    event_data = {
+        "id": str(order.first().id),
+        "customer_id": str(order.first().customer_id),
+        "title": order.first().title,
+        "planned_date_begin": str(order.first().planned_date_begin),
+        "planned_date_end": str(order.first().planned_date_end),
+        "status": str(order.first().status),
+        "created_at": str(order.first().created_at),
+    }
+
+    event_id = redis_client.xadd("order-completion-stream", event_data)
+    print(event_id)
 
     return {"message": f"The order was updated successfully"}
 
