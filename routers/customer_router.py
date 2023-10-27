@@ -5,7 +5,6 @@ from typing import List
 
 from database import get_db
 
-# from models import Customer
 from schemas import schemas
 
 from repositories import customer_repository

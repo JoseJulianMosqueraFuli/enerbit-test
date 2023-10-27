@@ -96,7 +96,7 @@ python main.py
 - Create Tests and Analitycs
 - Consider create access control for db (login)
 - Template for visual analytics
-- Consider Containers the app
+- Consider containerizing the app
 - Always could be improved
 
 ## License
