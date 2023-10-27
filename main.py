@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from database import Base, engine
 from fastapi.middleware.cors import CORSMiddleware
 
-from routers import customer_router, work_order_router
+from routers import customer_router, work_order_router, analytics_router
 
 app = FastAPI(
     title="Service Order Management System",
@@ -26,6 +26,7 @@ Base.metadata.create_all(bind=engine)
 
 app.include_router(customer_router.router)
 app.include_router(work_order_router.router)
+app.include_router(analytics_router.router)
 
 if __name__ == "__main__":
     import uvicorn

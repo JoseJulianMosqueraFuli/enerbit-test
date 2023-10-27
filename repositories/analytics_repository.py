@@ -25,7 +25,6 @@ def order_frequency_per_customer(db: Session):
 
 
 def identify_customer_activity_periods(db: Session):
-    # Group by month and count work orders
     results = (
         db.query(
             extract("year", WorkOrder.created_at).label("year"),

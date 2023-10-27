@@ -2,6 +2,8 @@ from pydantic import BaseModel, Field, validator
 from datetime import datetime, timedelta
 from typing import List
 from enum import Enum
+from datetime import datetime
+
 
 import uuid
 
@@ -96,3 +98,13 @@ class ShowCustomerWorkOrderList(ShowCustomer):
 
     class Config:
         from_attributes = True
+
+
+def parse_datetime(date_string: str) -> datetime:
+    """Converts a date string to a date and time object."""
+    try:
+        return datetime.fromisoformat(date_string)
+    except ValueError:
+        raise ValueError(
+            "Invalid date and time format. Use ISO format (YYYYY-MM-DDTHH:MM:SS)"
+        )
