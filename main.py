@@ -4,7 +4,13 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from routers import customer_router, work_order_router
 
-app = FastAPI()
+app = FastAPI(
+    title="Service Order Management System",
+    description="This API provides endpoints for managing customers, service orders and data analysis..",
+    version="1.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc",
+)
 
 origins = ["*"]
 
