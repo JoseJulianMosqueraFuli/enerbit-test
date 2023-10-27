@@ -15,10 +15,12 @@ enerBit faces the challenge of efficiently recording and tracking service orders
     |-- work_order.py
  |-- repositories/
     |-- __init__.py
+    |-- analytics_repository.py
     |-- customer_repository.py
     |-- work_order_repository.py
  |-- routers/
     |-- __init__.py
+    |-- analytics_routers.py
     |-- customer_router.py
     |-- work_order_router.py
  |-- schemas/
@@ -27,9 +29,6 @@ enerBit faces the challenge of efficiently recording and tracking service orders
  |-- tasks/
    |-- __init__.py
    |-- redis.py
- |-- analytics/
-    |-- __init__.py
-    |-- reports.py
  |--tests/
     |-- __init__.py
  |-- requirements.txt
@@ -94,8 +93,11 @@ python main.py
 
 ## Improvements
 
-- Always could be improved
 - Create Tests and Analitycs
+- Consider create access control for db (login)
+- Template for visual analytics
+- Consider Containers the app
+- Always could be improved
 
 ## License
 
