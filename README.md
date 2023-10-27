@@ -93,6 +93,7 @@ python main.py
 
 ## Improvements
 
+- Add Alembic for Migrations
 - Create Tests and Analitycs
 - Consider create access control for db (login)
 - Template for visual analytics

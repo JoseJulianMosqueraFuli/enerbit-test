@@ -31,3 +31,4 @@ archive.zip
 
 # Environment variables
 .env
+alembic.ini
