@@ -37,7 +37,7 @@ def get_all(db: Session = Depends(get_db)):
     return work_order_repository.get_all(db)
 
 
-@router.get("/status_or_date")
+@router.get("/status-or-date")
 def get_orders_within_range_or_by_status(
     since: Optional[datetime] = None,
     until: Optional[datetime] = None,
