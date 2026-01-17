@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Any, List, Tuple
 
 from sqlalchemy import extract, func
 from sqlalchemy.orm import Session
@@ -6,7 +7,7 @@ from sqlalchemy.orm import Session
 from models import Customer, WorkOrder
 
 
-def calculate_average_duration(db: Session):
+def calculate_average_duration(db: Session) -> Any:
     average_duration = (
         db.query(func.avg(WorkOrder.planned_date_end - WorkOrder.planned_date_begin))
         .filter(WorkOrder.status == "done")
@@ -15,7 +16,7 @@ def calculate_average_duration(db: Session):
     return average_duration
 
 
-def order_frequency_per_customer(db: Session):
+def order_frequency_per_customer(db: Session) -> List[Tuple]:
     return (
         db.query(Customer.id, func.count(WorkOrder.id))
         .join(WorkOrder, Customer.id == WorkOrder.customer_id)
@@ -25,7 +26,7 @@ def order_frequency_per_customer(db: Session):
     )
 
 
-def identify_customer_activity_periods(db: Session):
+def identify_customer_activity_periods(db: Session) -> List[Tuple]:
     results = (
         db.query(
             extract("year", WorkOrder.created_at).label("year"),
@@ -43,7 +44,7 @@ def identify_customer_activity_periods(db: Session):
     return results
 
 
-def count_active_customers(db: Session, start: datetime, end: datetime):
+def count_active_customers(db: Session, start: datetime, end: datetime) -> int:
     active_customer_count = (
         db.query(func.count(Customer.id))
         .filter(

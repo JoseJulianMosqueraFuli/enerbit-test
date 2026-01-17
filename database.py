@@ -1,15 +1,25 @@
+from typing import Generator
+
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import DeclarativeBase, Session
 from sqlalchemy.orm.session import sessionmaker
 
 from config import Config
 
-engine = create_engine(Config.POSTGRES_CONFIG)
+engine = create_engine(
+    Config.POSTGRES_CONFIG,
+    pool_size=5,
+    max_overflow=10,
+    pool_pre_ping=True,
+)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
 
 
-def get_db():
+class Base(DeclarativeBase):
+    pass
+
+
+def get_db() -> Generator[Session, None, None]:
     db = SessionLocal()
     try:
         yield db

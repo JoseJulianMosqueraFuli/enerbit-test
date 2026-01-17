@@ -14,13 +14,13 @@ router = APIRouter(prefix="/v1/analytics", tags=["Analytics"])
 
 
 @router.get("/average-duration")
-def get_average_duration(db: Session = Depends(get_db)):
+def get_average_duration(db: Session = Depends(get_db)) -> dict:
     average_duration = analytics_repository.calculate_average_duration(db)
     return {"average_duration": average_duration}
 
 
 @router.get("/order-frequency")
-def get_order_frequency(db: Session = Depends(get_db)):
+def get_order_frequency(db: Session = Depends(get_db)) -> list:
     order_frequencies = analytics_repository.order_frequency_per_customer(db)
     return [
         {"customer_id": customer_id, "order_count": order_count}
@@ -29,7 +29,7 @@ def get_order_frequency(db: Session = Depends(get_db)):
 
 
 @router.get("/customer-activity")
-def get_customer_activity_periods(db: Session = Depends(get_db)):
+def get_customer_activity_periods(db: Session = Depends(get_db)) -> list:
     customer_activity_periods = analytics_repository.identify_customer_activity_periods(
         db
     )
@@ -40,7 +40,7 @@ def get_customer_activity_periods(db: Session = Depends(get_db)):
 
 
 @router.get("/active-customers")
-def get_active_customers(start: str, end: str, db: Session = Depends(get_db)):
+def get_active_customers(start: str, end: str, db: Session = Depends(get_db)) -> dict:
     start_date = schemas.parse_datetime(start)
     end_date = schemas.parse_datetime(end)
     active_customer_count = analytics_repository.count_active_customers(
@@ -50,7 +50,7 @@ def get_active_customers(start: str, end: str, db: Session = Depends(get_db)):
 
 
 @router.get("/average-duration-img")
-def average_duration(db: Session = Depends(get_db)):
+def average_duration(db: Session = Depends(get_db)) -> Response:
     avg = analytics_repository.calculate_average_duration(db)
 
     fig, ax = plt.subplots()
@@ -67,7 +67,7 @@ def average_duration(db: Session = Depends(get_db)):
 
 # Order frequency
 @router.get("/order-frequency/image")
-def order_frequency_image(db: Session = Depends(get_db)):
+def order_frequency_image(db: Session = Depends(get_db)) -> Response:
     frequencies = analytics_repository.order_frequency_per_customer(db)
 
     df = pd.DataFrame(frequencies, columns=["customer_id", "order_count"])
@@ -83,7 +83,7 @@ def order_frequency_image(db: Session = Depends(get_db)):
 
 # Customer activity
 @router.get("/customer-activity/image")
-def customer_activity_image(db: Session = Depends(get_db)):
+def customer_activity_image(db: Session = Depends(get_db)) -> Response:
     activities = analytics_repository.identify_customer_activity_periods(db)
 
     df = pd.DataFrame(activities, columns=["year", "month", "total_orders"])
@@ -99,7 +99,7 @@ def customer_activity_image(db: Session = Depends(get_db)):
 
 # Active customers
 @router.get("/active-customers/image")
-def active_customers_image(start: str, end: str, db: Session = Depends(get_db)):
+def active_customers_image(start: str, end: str, db: Session = Depends(get_db)) -> Response:
     start_date = schemas.parse_datetime(start)
     end_date = schemas.parse_datetime(end)
 

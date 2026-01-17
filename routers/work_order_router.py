@@ -15,22 +15,22 @@ router = APIRouter(prefix="/v1/work_orders", tags=["Work Orders"])
 @router.post(
     "/", status_code=status.HTTP_201_CREATED, response_model=schemas.ShowWorkOrder
 )
-def create(request: schemas.WorkOrder, is_active: bool, db: Session = Depends(get_db)):
+def create(request: schemas.WorkOrder, is_active: bool, db: Session = Depends(get_db)) -> dict:
     return work_order_repository.create(request, is_active, db)
 
 
 @router.put("/{id}", status_code=status.HTTP_202_ACCEPTED)
-def update(id, request: schemas.WorkOrder, db: Session = Depends(get_db)):
+def update(id: str, request: schemas.WorkOrder, db: Session = Depends(get_db)) -> dict:
     return work_order_repository.update(id, request, db)
 
 
 @router.put("/{id}/status/done", status_code=status.HTTP_202_ACCEPTED)
-def finish(id, db: Session = Depends(get_db)):
+def finish(id: str, db: Session = Depends(get_db)) -> dict:
     return work_order_repository.finish(id, db)
 
 
 @router.get("/", response_model=List[schemas.ShowWorkOrder])
-def get_all(db: Session = Depends(get_db)):
+def get_all(db: Session = Depends(get_db)) -> List:
     return work_order_repository.get_all(db)
 
 
@@ -40,7 +40,7 @@ def get_orders_within_range_or_by_status(
     until: Optional[datetime] = None,
     status: Optional[str] = None,
     db: Session = Depends(get_db),
-):
+) -> dict:
     if since and until:
         return work_order_repository.get_all_from_range(since, until, db)
 
@@ -55,7 +55,7 @@ def get_orders_within_range_or_by_status(
 @router.get(
     "/{id}", status_code=status.HTTP_200_OK, response_model=schemas.ShowWorkOrder
 )
-def show(id, response: Response, db: Session = Depends(get_db)):
+def show(id: str, response: Response, db: Session = Depends(get_db)) -> dict:
     order = db.query(WorkOrder).filter(WorkOrder.id == id).first()
 
     if not order:
@@ -69,7 +69,7 @@ def show(id, response: Response, db: Session = Depends(get_db)):
 
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-def destroy(id, db: Session = Depends(get_db)):
+def destroy(id: str, db: Session = Depends(get_db)) -> dict:
     order = db.query(WorkOrder).filter(WorkOrder.id == id)
 
     if not order.first():

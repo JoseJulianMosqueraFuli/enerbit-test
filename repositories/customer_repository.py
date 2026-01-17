@@ -1,4 +1,7 @@
-import uuid
+"""Customer repository module.
+
+This module contains all database operations related to customers.
+"""
 
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
@@ -7,11 +10,17 @@ from models import Customer
 from schemas import schemas
 
 
-def create_customer(request: schemas.Customer, db: Session):
-    new_customer_id = str(uuid.uuid4())
+def create_customer(request: schemas.Customer, db: Session) -> Customer:
+    """Create a new customer in the database.
 
+    Args:
+        request: Customer data from request
+        db: Database session
+
+    Returns:
+        Customer: The created customer object
+    """
     new_customer = Customer(
-        id=new_customer_id,
         first_name=request.first_name,
         last_name=request.last_name,
         address=request.address,
@@ -23,17 +32,46 @@ def create_customer(request: schemas.Customer, db: Session):
     return new_customer
 
 
-def get_all_customer(db: Session):
+def get_all_customer(db: Session) -> list:
+    """Get all customers from the database.
+
+    Args:
+        db: Database session
+
+    Returns:
+        list: List of all customers
+    """
     customers = db.query(Customer).all()
     return customers
 
 
-def get_active_customer(db: Session):
+def get_active_customer(db: Session) -> list:
+    """Get all active customers from the database.
+
+    Args:
+        db: Database session
+
+    Returns:
+        list: List of active customers
+    """
     customers = db.query(Customer).filter(Customer.is_active == True).all()
     return customers
 
 
-def update_customer(id, request: schemas.Customer, db: Session):
+def update_customer(id: str, request: schemas.Customer, db: Session) -> dict:
+    """Update an existing customer.
+
+    Args:
+        id: Customer ID
+        request: Updated customer data
+        db: Database session
+
+    Returns:
+        dict: Success message
+
+    Raises:
+        HTTPException: If customer not found
+    """
     customer = db.query(Customer).filter(Customer.id == id)
 
     if not customer.first():
@@ -55,7 +93,19 @@ def update_customer(id, request: schemas.Customer, db: Session):
     return {"message": f"The customer was updated successfully"}
 
 
-def get_customer_by_id(id, db: Session):
+def get_customer_by_id(id: str, db: Session) -> Customer:
+    """Get a customer by ID.
+
+    Args:
+        id: Customer ID
+        db: Database session
+
+    Returns:
+        Customer: The customer object
+
+    Raises:
+        HTTPException: If customer not found
+    """
     customer = db.query(Customer).filter(Customer.id == id).first()
 
     if not customer:
@@ -67,7 +117,19 @@ def get_customer_by_id(id, db: Session):
     return customer
 
 
-def delete_customer(id, db: Session):
+def delete_customer(id: str, db: Session) -> dict:
+    """Delete a customer from the database.
+
+    Args:
+        id: Customer ID
+        db: Database session
+
+    Returns:
+        dict: Success message
+
+    Raises:
+        HTTPException: If customer not found
+    """
     customer = db.query(Customer).filter(Customer.id == id)
 
     if not customer.first():

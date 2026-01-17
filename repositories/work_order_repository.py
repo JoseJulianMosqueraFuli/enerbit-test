@@ -1,3 +1,8 @@
+"""Work order repository module.
+
+This module contains all database operations related to work orders.
+"""
+
 import uuid
 from datetime import datetime
 
@@ -9,8 +14,17 @@ from schemas import schemas
 from tasks import redis_client
 
 
-def create(request: schemas.WorkOrder, is_active: bool, db: Session):
-    new_order_id = str(uuid.uuid4())
+def create(request: schemas.WorkOrder, is_active: bool, db: Session) -> WorkOrder:
+    """Create a new work order in the database.
+
+    Args:
+        request: Work order data from request
+        is_active: Whether the customer should be marked as active
+        db: Database session
+
+    Returns:
+        WorkOrder: The created work order object
+    """
     total_work_orders = (
         db.query(WorkOrder).filter(WorkOrder.customer_id == request.customer_id).count()
     )
@@ -18,11 +32,10 @@ def create(request: schemas.WorkOrder, is_active: bool, db: Session):
     if total_work_orders > 0:
         customer = db.query(Customer).filter(Customer.id == request.customer_id)
 
-        if customer.first().is_active and is_active == False:
+        if customer.first().is_active and is_active is False:
             customer.update({"is_active": is_active, "end_date": datetime.now()})
 
     new_order = WorkOrder(
-        id=new_order_id,
         customer_id=request.customer_id,
         title=request.title,
         planned_date_begin=request.planned_date_begin,
@@ -37,12 +50,30 @@ def create(request: schemas.WorkOrder, is_active: bool, db: Session):
     return new_order
 
 
-def get_all(db: Session):
+def get_all(db: Session) -> list:
+    """Get all work orders from the database.
+
+    Args:
+        db: Database session
+
+    Returns:
+        list: List of all work orders
+    """
     orders = db.query(WorkOrder).all()
     return orders
 
 
-def get_all_from_range(since, until, db: Session):
+def get_all_from_range(since: datetime, until: datetime, db: Session) -> list:
+    """Get work orders created within a date range.
+
+    Args:
+        since: Start date
+        until: End date
+        db: Database session
+
+    Returns:
+        list: List of work orders within the date range
+    """
     filtered_orders = (
         db.query(WorkOrder).filter(WorkOrder.created_at.between(since, until)).all()
     )
@@ -50,12 +81,34 @@ def get_all_from_range(since, until, db: Session):
     return filtered_orders
 
 
-def get_orders_by_status(status, db: Session):
+def get_orders_by_status(status: str, db: Session) -> list:
+    """Get work orders by status.
+
+    Args:
+        status: Work order status
+        db: Database session
+
+    Returns:
+        list: List of work orders with the specified status
+    """
     by_status = db.query(WorkOrder).filter(WorkOrder.status == status).all()
     return by_status
 
 
-def update(id, request: schemas.WorkOrder, db: Session):
+def update(id: str, request: schemas.WorkOrder, db: Session) -> dict:
+    """Update an existing work order.
+
+    Args:
+        id: Work order ID
+        request: Updated work order data
+        db: Database session
+
+    Returns:
+        dict: Success message
+
+    Raises:
+        HTTPException: If work order not found
+    """
     order = db.query(WorkOrder).filter(WorkOrder.id == id)
 
     if not order.first():
@@ -66,9 +119,10 @@ def update(id, request: schemas.WorkOrder, db: Session):
 
     order.update(
         {
-            "first_name": request.first_name,
-            "last_name": request.last_name,
-            "address": request.address,
+            "title": request.title,
+            "planned_date_begin": request.planned_date_begin,
+            "planned_date_end": request.planned_date_end,
+            "status": request.status,
         }
     )
 
@@ -77,7 +131,19 @@ def update(id, request: schemas.WorkOrder, db: Session):
     return {"message": f"The order was updated successfully"}
 
 
-def finish(id, db: Session):
+def finish(id: str, db: Session) -> dict:
+    """Mark a work order as done and update customer status.
+
+    Args:
+        id: Work order ID
+        db: Database session
+
+    Returns:
+        dict: Success message
+
+    Raises:
+        HTTPException: If work order not found
+    """
     order = db.query(WorkOrder).filter(WorkOrder.id == id)
 
     if not order.first():
@@ -119,7 +185,19 @@ def finish(id, db: Session):
     return {"message": f"The order was updated successfully"}
 
 
-def show(id, db: Session):
+def show(id: str, db: Session) -> WorkOrder:
+    """Get a work order by ID.
+
+    Args:
+        id: Work order ID
+        db: Database session
+
+    Returns:
+        WorkOrder: The work order object
+
+    Raises:
+        HTTPException: If work order not found
+    """
     order = db.query(WorkOrder).filter(WorkOrder.id == id).first()
 
     if not order:
@@ -131,7 +209,19 @@ def show(id, db: Session):
     return order
 
 
-def destroy(id, db: Session):
+def destroy(id: str, db: Session) -> dict:
+    """Delete a work order from the database.
+
+    Args:
+        id: Work order ID
+        db: Database session
+
+    Returns:
+        dict: Success message
+
+    Raises:
+        HTTPException: If work order not found
+    """
     order = db.query(WorkOrder).filter(WorkOrder.id == id)
 
     if not order.first():
