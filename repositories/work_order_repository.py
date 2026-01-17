@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 
 from models import Customer, WorkOrder
 from schemas import schemas
-from tasks import redis_client
+from tasks.redis import safe_redis_xadd
 
 
 def create(request: schemas.WorkOrder, is_active: bool, db: Session) -> WorkOrder:
@@ -179,8 +179,11 @@ def finish(id: str, db: Session) -> dict:
         "created_at": str(order.first().created_at),
     }
 
-    event_id = redis_client.xadd("order-completion-stream", event_data)
-    print(event_id)
+    event_id = safe_redis_xadd("order-completion-stream", event_data)
+    if event_id:
+        print(f"Event published to Redis: {event_id}")
+    else:
+        print("Event queued locally due to Redis unavailability")
 
     return {"message": f"The order was updated successfully"}
 
