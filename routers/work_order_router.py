@@ -1,18 +1,15 @@
-from typing import List, Optional
-from fastapi import APIRouter, Depends, Query, status, Response, HTTPException
-from sqlalchemy.orm import Session
 from datetime import datetime
+from typing import List, Optional
 
+from fastapi import APIRouter, Depends, HTTPException, Response, status
+from sqlalchemy.orm import Session
 
 from database import get_db
 from models import WorkOrder
+from repositories import work_order_repository
 from schemas import schemas
 
-from repositories import work_order_repository
-
-
 router = APIRouter(prefix="/v1/work_orders", tags=["Work Orders"])
-from typing import Optional
 
 
 @router.post(

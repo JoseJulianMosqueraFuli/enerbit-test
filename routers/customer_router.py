@@ -1,14 +1,11 @@
 from typing import List
-from fastapi import APIRouter, Depends, status, Response, HTTPException
+
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy.orm import Session
-from typing import List
 
 from database import get_db
-
-from schemas import schemas
-
 from repositories import customer_repository
-
+from schemas import schemas
 
 router = APIRouter(prefix="/v1/customers", tags=["Customers"])
 

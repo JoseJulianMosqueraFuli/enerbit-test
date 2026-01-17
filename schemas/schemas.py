@@ -1,11 +1,9 @@
-from pydantic import BaseModel, Field, validator
-from datetime import datetime, timedelta
-from typing import List
-from enum import Enum
-from datetime import datetime
-
-
 import uuid
+from datetime import datetime, timedelta
+from enum import Enum
+from typing import List
+
+from pydantic import BaseModel, Field, validator
 
 
 class CustomerBase(BaseModel):

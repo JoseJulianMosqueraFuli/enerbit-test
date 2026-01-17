@@ -1,15 +1,14 @@
-from fastapi import APIRouter, Depends, status, Response
-from sqlalchemy.orm import Session
 import io
+
 import matplotlib.pyplot as plt
-import seaborn as sns
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
-import plotly.express as px
 import pandas as pd
-from schemas import schemas
+import seaborn as sns
+from fastapi import APIRouter, Depends, Response
+from sqlalchemy.orm import Session
+
 from database import get_db
 from repositories import analytics_repository
+from schemas import schemas
 
 router = APIRouter(prefix="/v1/analytics", tags=["Analytics"])
 
