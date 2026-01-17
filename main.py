@@ -28,6 +28,7 @@ from middleware import LoggingMiddleware
 from routers import analytics_router, customer_router, work_order_router
 from security_headers import SecurityHeadersMiddleware
 from settings import settings
+import health_check
 
 # Setup logging
 setup_logging(log_level=settings.LOG_LEVEL)
@@ -78,6 +79,7 @@ app.add_middleware(
 
 Base.metadata.create_all(bind=engine)
 
+app.include_router(health_check.router)
 app.include_router(customer_router.router)
 app.include_router(work_order_router.router)
 app.include_router(analytics_router.router)
