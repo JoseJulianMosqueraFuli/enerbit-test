@@ -27,17 +27,21 @@ from logger import setup_logging
 from middleware import LoggingMiddleware
 from routers import analytics_router, customer_router, work_order_router
 from security_headers import SecurityHeadersMiddleware
+from settings import settings
 
 # Setup logging
-setup_logging(log_level="INFO")
+setup_logging(log_level=settings.LOG_LEVEL)
 
 # Setup rate limiter
-limiter = Limiter(key_func=get_remote_address, default_limits=["100/minute"])
+limiter = Limiter(
+    key_func=get_remote_address,
+    default_limits=[f"{settings.RATE_LIMIT_PER_MINUTE}/minute"],
+)
 
 app = FastAPI(
-    title="Service Order Management System",
+    title=settings.APP_NAME,
     description="This API provides endpoints for managing customers, service orders and data analysis..",
-    version="1.0.0",
+    version=settings.APP_VERSION,
     docs_url="/docs",
     redoc_url="/redoc",
 )
@@ -56,7 +60,7 @@ app.add_exception_handler(Exception, generic_exception_handler)
 
 # TODO: Replace with environment-specific origins in production
 # For production, use: origins = ["https://yourdomain.com"]
-origins = ["*"]
+origins = settings.ALLOWED_ORIGINS
 
 # Add security headers middleware
 app.add_middleware(SecurityHeadersMiddleware)

@@ -9,13 +9,13 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, Session
 from sqlalchemy.orm.session import sessionmaker
 
-from config import Config
+from settings import settings
 
 engine = create_engine(
-    Config.POSTGRES_CONFIG,
-    pool_size=5,
-    max_overflow=10,
-    pool_pre_ping=True,
+    settings.DATABASE_URL,
+    pool_size=settings.DB_POOL_SIZE,
+    max_overflow=settings.DB_MAX_OVERFLOW,
+    pool_pre_ping=settings.DB_POOL_PRE_PING,
 )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

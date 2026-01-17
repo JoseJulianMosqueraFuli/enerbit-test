@@ -1,17 +1,16 @@
 """Configuration module.
 
-This module loads and manages application configuration from environment variables.
+This module provides backward compatibility with the old Config class.
+For new code, use settings.py directly.
 """
 
-import os
-from typing import Optional
-
-from dotenv import load_dotenv
-
-load_dotenv()
+from settings import settings
 
 
 class Config:
-    POSTGRES_CONFIG: Optional[str] = os.getenv("DATABASE_URL")
-    REDIS_HOST: Optional[str] = os.getenv("REDIS_HOST")
-    REDIS_PORT: Optional[str] = os.getenv("REDIS_PORT")
+    """Legacy configuration class for backward compatibility."""
+
+    POSTGRES_CONFIG = settings.DATABASE_URL
+    REDIS_HOST = settings.REDIS_HOST
+    REDIS_PORT = str(settings.REDIS_PORT)
+
