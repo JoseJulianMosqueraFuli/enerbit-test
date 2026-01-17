@@ -1,8 +1,8 @@
 from fastapi import FastAPI
-from database import Base, engine
 from fastapi.middleware.cors import CORSMiddleware
 
-from routers import customer_router, work_order_router, analytics_router
+from database import Base, engine
+from routers import analytics_router, customer_router, work_order_router
 
 app = FastAPI(
     title="Service Order Management System",
