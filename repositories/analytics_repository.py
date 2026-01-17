@@ -1,8 +1,9 @@
-from sqlalchemy import func
-from sqlalchemy.orm import Session
-from models import WorkOrder, Customer
 from datetime import datetime
-from sqlalchemy import extract
+
+from sqlalchemy import extract, func
+from sqlalchemy.orm import Session
+
+from models import Customer, WorkOrder
 
 
 def calculate_average_duration(db: Session):

@@ -1,10 +1,12 @@
+import uuid
+from datetime import datetime
+
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
-from datetime import datetime
-from models import WorkOrder, Customer
+
+from models import Customer, WorkOrder
 from schemas import schemas
 from tasks import redis_client
-import uuid
 
 
 def create(request: schemas.WorkOrder, is_active: bool, db: Session):

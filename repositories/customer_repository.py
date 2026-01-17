@@ -1,8 +1,10 @@
-from fastapi import HTTPException, status, Response
+import uuid
+
+from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
+
 from models import Customer
 from schemas import schemas
-import uuid
 
 
 def create_customer(request: schemas.Customer, db: Session):
