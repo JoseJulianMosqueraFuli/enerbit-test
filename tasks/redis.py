@@ -1,4 +1,5 @@
 import redis
+
 from config import Config
 
 redis_host = Config.REDIS_HOST
