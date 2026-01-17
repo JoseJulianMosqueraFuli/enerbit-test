@@ -1,3 +1,8 @@
+"""Database configuration module.
+
+This module configures the database connection and session management.
+"""
+
 from typing import Generator
 
 from sqlalchemy import create_engine

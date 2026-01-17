@@ -1,3 +1,8 @@
+"""Work order router module.
+
+This module defines all API endpoints related to work order management.
+"""
+
 from datetime import datetime
 from typing import List, Optional
 

@@ -1,3 +1,8 @@
+"""Redis client module.
+
+This module configures the Redis client for event streaming.
+"""
+
 import redis
 
 from config import Config

@@ -1,3 +1,8 @@
+"""Configuration module.
+
+This module loads and manages application configuration from environment variables.
+"""
+
 import os
 from typing import Optional
 

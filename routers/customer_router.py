@@ -1,3 +1,8 @@
+"""Customer router module.
+
+This module defines all API endpoints related to customer management.
+"""
+
 from typing import List
 
 from fastapi import APIRouter, Depends, status

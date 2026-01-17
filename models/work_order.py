@@ -1,3 +1,8 @@
+"""Work order model module.
+
+This module defines the WorkOrder SQLAlchemy model.
+"""
+
 import uuid
 from datetime import datetime
 from typing import Optional

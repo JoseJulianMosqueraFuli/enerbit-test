@@ -1,3 +1,8 @@
+"""Main application module.
+
+This module initializes the FastAPI application and configures middleware.
+"""
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 

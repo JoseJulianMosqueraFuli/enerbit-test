@@ -1,3 +1,8 @@
+"""Analytics router module.
+
+This module defines all API endpoints related to analytics and reporting.
+"""
+
 import io
 
 import matplotlib.pyplot as plt

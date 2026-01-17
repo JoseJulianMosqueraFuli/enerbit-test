@@ -1,3 +1,8 @@
+"""Customer model module.
+
+This module defines the Customer SQLAlchemy model.
+"""
+
 import uuid
 from datetime import datetime
 from typing import List, Optional

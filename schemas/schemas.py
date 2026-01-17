@@ -1,3 +1,8 @@
+"""Pydantic schemas module.
+
+This module defines all Pydantic models for request/response validation.
+"""
+
 import uuid
 from datetime import datetime, timedelta
 from enum import Enum
