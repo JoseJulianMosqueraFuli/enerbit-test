@@ -74,7 +74,7 @@ def show(id: str, response: Response, db: Session = Depends(get_db)) -> dict:
 
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-def destroy(id: str, db: Session = Depends(get_db)) -> dict:
+def destroy(id: str, db: Session = Depends(get_db)) -> None:
     order = db.query(WorkOrder).filter(WorkOrder.id == id)
 
     if not order.first():
@@ -85,4 +85,3 @@ def destroy(id: str, db: Session = Depends(get_db)) -> dict:
 
     order.delete(synchronize_session=False)
     db.commit()
-    return {"message": f"The order {id} has been deleted sucessfully"}

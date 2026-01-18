@@ -43,5 +43,5 @@ def show(id: str, db: Session = Depends(get_db)) -> dict:
 
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_customer(id: str, db: Session = Depends(get_db)) -> dict:
-    return customer_repository.delete_customer(id, db)
+def delete_customer(id: str, db: Session = Depends(get_db)) -> None:
+    customer_repository.delete_customer(id, db)
