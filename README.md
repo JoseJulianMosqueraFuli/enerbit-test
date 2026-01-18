@@ -57,7 +57,12 @@ A production-ready FastAPI application for efficiently managing customers, servi
 
 ## Prerequisites
 
-Before you begin, ensure you have the following installed:
+### Option 1: Docker (Recommended)
+
+- **Docker** - [Download](https://www.docker.com/get-started)
+- **Docker Compose** - Included with Docker Desktop
+
+### Option 2: Local Development
 
 - **Python 3.10+** - [Download](https://www.python.org/downloads/)
 - **PostgreSQL 15+** - [Download](https://www.postgresql.org/download/)
@@ -66,27 +71,47 @@ Before you begin, ensure you have the following installed:
 
 ## Installation
 
-### 1. Clone the Repository
+### Quick Start with Docker (Recommended)
+
+```bash
+# Clone the repository
+git clone git@github.com:JoseJulianMosqueraFuli/enerbit-test.git
+cd enerbit-test
+
+# Start all services
+docker-compose up -d
+
+# Check health
+curl http://localhost:8000/health
+```
+
+That's it! The API is now running at http://localhost:8000
+
+See [DOCKER_GUIDE.md](DOCKER_GUIDE.md) for detailed Docker documentation.
+
+### Manual Installation
+
+#### 1. Clone the Repository
 
 ```bash
 git clone git@github.com:JoseJulianMosqueraFuli/enerbit-test.git
 cd enerbit-test
 ```
 
-### 2. Create Virtual Environment
+#### 2. Create Virtual Environment
 
 ```bash
 python3 -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
 
-### 3. Install Dependencies
+#### 3. Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Set Up Database
+#### 4. Set Up Database
 
 Create a PostgreSQL database:
 
@@ -100,7 +125,7 @@ Or using psql:
 CREATE DATABASE service_orders;
 ```
 
-### 5. Configure Environment Variables
+#### 5. Configure Environment Variables
 
 Copy the example environment file and update with your settings:
 
@@ -163,7 +188,23 @@ The application validates all settings on startup:
 
 ## Running the Application
 
-### Development Mode
+### Using Docker (Recommended)
+
+```bash
+# Start all services
+make up
+
+# View logs
+make logs
+
+# Stop services
+make down
+
+# See all commands
+make help
+```
+
+### Manual Development Mode
 
 ```bash
 # Using uvicorn with auto-reload
@@ -176,6 +217,10 @@ python main.py
 ### Production Mode
 
 ```bash
+# With Docker
+make prod-up
+
+# Manual
 uvicorn main:app --host 0.0.0.0 --port 8000 --workers 4
 ```
 
@@ -184,6 +229,8 @@ The API will be available at:
 - **API**: http://localhost:8000
 - **Interactive Docs**: http://localhost:8000/docs
 - **ReDoc**: http://localhost:8000/redoc
+- **Health Check**: http://localhost:8000/health
+- **Readiness Check**: http://localhost:8000/ready
 
 ## API Documentation
 
@@ -380,15 +427,42 @@ tests/
 
 ## Deployment
 
-### Docker Deployment (Coming Soon)
+### Docker Deployment
+
+#### Development
 
 ```bash
-# Build image
-docker build -t service-orders:latest .
+# Start all services
+docker-compose up -d
 
-# Run container
-docker run -p 8000:8000 --env-file .env service-orders:latest
+# View logs
+docker-compose logs -f
+
+# Stop services
+docker-compose down
 ```
+
+#### Production
+
+```bash
+# Build and start in production mode
+docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+# Or using Makefile
+make prod-up
+```
+
+See [DOCKER_GUIDE.md](DOCKER_GUIDE.md) for comprehensive Docker documentation.
+
+### Docker Features
+
+- Multi-stage builds for optimized image size
+- Health checks for all services
+- Automatic service dependencies
+- Volume persistence for data
+- Network isolation
+- Non-root user for security
+- Production-ready configuration
 
 ### AWS Deployment (Planned)
 
