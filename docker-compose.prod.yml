@@ -1,0 +1,36 @@
+version: "3.8"
+
+# Production Docker Compose configuration
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+services:
+  postgres:
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+    restart: always
+
+  redis:
+    restart: always
+    volumes:
+      - redis_data_prod:/data
+
+  app:
+    environment:
+      ENVIRONMENT: production
+      DEBUG: false
+      LOG_LEVEL: WARNING
+    restart: always
+    # Remove volume mount for production (no hot reload)
+    volumes: []
+    # Use production command (no --reload)
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --workers 4
+
+volumes:
+  postgres_data_prod:
+    driver: local
+  redis_data_prod:
+    driver: local
