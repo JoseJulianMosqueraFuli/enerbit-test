@@ -79,6 +79,7 @@ git clone git@github.com:JoseJulianMosqueraFuli/enerbit-test.git
 cd enerbit-test
 
 # Start all services
+cd docker
 docker-compose up -d
 
 # Check health
@@ -87,7 +88,7 @@ curl http://localhost:8000/health
 
 That's it! The API is now running at http://localhost:8000
 
-See [DOCKER_GUIDE.md](DOCKER_GUIDE.md) for detailed Docker documentation.
+See [DOCKER_GUIDE.md](docs/DOCKER_GUIDE.md) for detailed Docker documentation.
 
 ### Manual Installation
 
@@ -191,6 +192,9 @@ The application validates all settings on startup:
 ### Using Docker (Recommended)
 
 ```bash
+# Navigate to docker directory
+cd docker
+
 # Start all services
 make up
 
@@ -218,7 +222,7 @@ python main.py
 
 ```bash
 # With Docker
-make prod-up
+cd docker && make prod-up
 
 # Manual
 uvicorn main:app --host 0.0.0.0 --port 8000 --workers 4
@@ -311,6 +315,7 @@ enerbit-test/
 ├── logger.py                    # Structured logging
 ├── middleware.py                # Custom middleware
 ├── security_headers.py          # Security headers middleware
+├── health_check.py              # Health and readiness endpoints
 │
 ├── models/                      # SQLAlchemy models
 │   ├── __init__.py
@@ -342,14 +347,27 @@ enerbit-test/
 │   ├── env.py
 │   └── script.py.mako
 │
-├── tests/                       # Test suite (coming soon)
-│   └── __init__.py
+├── docker/                      # Docker configuration
+│   ├── Dockerfile
+│   ├── docker-compose.yml
+│   ├── docker-compose.prod.yml
+│   ├── .dockerignore
+│   ├── docker-entrypoint.sh
+│   └── Makefile
+│
+├── docs/                        # Documentation
+│   └── DOCKER_GUIDE.md
+│
+├── tests/                       # Test suite
+│   ├── __init__.py
+│   └── test_health.py
 │
 ├── requirements.txt             # Python dependencies
 ├── .env.example                 # Environment variables template
 ├── .gitignore                   # Git ignore rules
 ├── LICENSE                      # MIT License
-└── README.md                    # This file
+├── README.md                    # This file
+└── PROJECT_STATUS.md            # Project status report
 ```
 
 ## Development
@@ -432,6 +450,9 @@ tests/
 #### Development
 
 ```bash
+# Navigate to docker directory
+cd docker
+
 # Start all services
 docker-compose up -d
 
@@ -445,6 +466,9 @@ docker-compose down
 #### Production
 
 ```bash
+# Navigate to docker directory
+cd docker
+
 # Build and start in production mode
 docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 
@@ -452,7 +476,7 @@ docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 make prod-up
 ```
 
-See [DOCKER_GUIDE.md](DOCKER_GUIDE.md) for comprehensive Docker documentation.
+See [DOCKER_GUIDE.md](docs/DOCKER_GUIDE.md) for comprehensive Docker documentation.
 
 ### Docker Features
 
