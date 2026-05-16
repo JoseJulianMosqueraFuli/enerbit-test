@@ -1,18 +1,23 @@
 # Multi-stage Dockerfile for FastAPI application
-# Stage 1: Builder - Install dependencies
+# Stage 1: Builder - Install dependencies with Poetry
 FROM python:3.11-slim as builder
 
 WORKDIR /app
 
-# Install system dependencies
+# Install system dependencies and Poetry
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     postgresql-client \
+    curl \
+    && curl -sSL https://install.python-poetry.org | python3 - \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements and install Python dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir --user -r requirements.txt
+ENV PATH="/root/.local/bin:$PATH"
+
+# Copy Poetry files and install dependencies
+COPY pyproject.toml poetry.lock ./
+RUN poetry export -f requirements.txt --output requirements.txt --without-hashes \
+    && pip install --no-cache-dir --user -r requirements.txt
 
 # Stage 2: Runtime - Minimal production image
 FROM python:3.11-slim
