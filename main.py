@@ -77,7 +77,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-Base.metadata.create_all(bind=engine)
+import os
+
+if os.getenv("SKIP_DB_INIT", "false").lower() != "true":
+    Base.metadata.create_all(bind=engine)
 
 app.include_router(health_check.router)
 app.include_router(customer_router.router)
