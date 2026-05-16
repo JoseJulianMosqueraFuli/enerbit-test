@@ -1,0 +1,118 @@
+[tool.poetry]
+name = "enerbit-test"
+version = "1.0.0"
+description = "Service Order Management System - RESTful API for managing customers, service orders and data analysis"
+authors = ["Jose Julian Mosquera Fuli"]
+license = "MIT"
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+# Core Framework
+fastapi = "0.104.0"
+uvicorn = "0.23.2"
+starlette = ">=0.27.0,<0.28.0"
+
+# Database
+sqlalchemy = "2.0.22"
+psycopg2-binary = "2.9.9"
+alembic = "^1.12.0"
+
+# Redis
+redis = "5.0.1"
+
+# Validation and Settings
+pydantic = "2.12.5"
+pydantic-settings = "2.12.0"
+
+# Configuration
+python-dotenv = "1.0.0"
+
+# HTTP and Networking
+httpx = ">=0.24.0,<0.26.0"
+
+# Logging
+python-json-logger = "4.0.0"
+
+# Security and Rate Limiting
+slowapi = "0.1.9"
+
+# Data Analysis and Visualization
+pandas = "2.3.3"
+numpy = "1.26.1"
+matplotlib = "3.8.0"
+seaborn = "0.13.2"
+
+[tool.poetry.group.dev.dependencies]
+# Testing
+pytest = "7.4.3"
+pytest-cov = "4.1.0"
+pytest-asyncio = "0.23.2"
+factory-boy = "3.3.0"
+coverage = "7.3.2"
+
+# Code Quality Tools
+isort = "5.13.2"
+autoflake = "2.2.1"
+pylint = "3.0.3"
+black = "23.12.1"
+mypy = "1.8.0"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short --strict-markers --cov=. --cov-report=term-missing --cov-report=html"
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+]
+
+[tool.black]
+line-length = 88
+target-version = ["py310"]
+include = '\.pyi?$'
+
+[tool.isort]
+profile = "black"
+line_length = 88
+known_first_party = ["database", "settings", "models", "schemas", "repositories", "routers"]
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+
+[tool.pylint.master]
+max-line-length = 88
+disable = [
+    "C0114",  # missing-module-docstring
+    "C0115",  # missing-class-docstring
+    "C0116",  # missing-function-docstring
+    "R0903",  # too-few-public-methods
+]
+
+[tool.coverage.run]
+source = ["."]
+omit = [
+    "tests/*",
+    "venv/*",
+    "*/site-packages/*",
+    "alembic/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.:",
+    "raise NotImplementedError",
+]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
