@@ -55,7 +55,7 @@ pytz==2025.2
 tzdata==2025.3
 
 # Utilities
-click==8.1.7
+click==8.3.3
 packaging==23.2
 six==1.16.0
 greenlet==3.0.1
