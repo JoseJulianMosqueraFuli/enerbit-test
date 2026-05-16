@@ -21,8 +21,14 @@ from schemas.schemas import WorkOrder as WorkOrderSchema
 
 
 class TestCreateWorkOrder:
-    def test_create_work_order(self, db_session, sample_customer, sample_work_order_data):
-        wo_schema = WorkOrderSchema(**sample_work_order_data)
+    def test_create_work_order(self, db_session, sample_customer):
+        from schemas.schemas import WorkOrderBase
+        wo_schema = WorkOrderBase(
+            title="Test Work Order",
+            planned_date_begin=datetime.now(timezone.utc) + timedelta(hours=2),
+            planned_date_end=datetime.now(timezone.utc) + timedelta(hours=5),
+            status="new",
+        )
         result = create(wo_schema, is_active=True, db=db_session)
 
         assert result.id is not None
@@ -31,22 +37,34 @@ class TestCreateWorkOrder:
         assert result.customer_id == sample_customer.id
 
     def test_create_work_order_activates_customer(
-        self, db_session, sample_customer, sample_work_order_data
+        self, db_session, sample_customer
     ):
-        wo_schema = WorkOrderSchema(**sample_work_order_data)
+        from schemas.schemas import WorkOrderBase
+        wo_schema = WorkOrderBase(
+            title="Test Work Order",
+            planned_date_begin=datetime.now(timezone.utc) + timedelta(hours=2),
+            planned_date_end=datetime.now(timezone.utc) + timedelta(hours=5),
+            status="new",
+        )
         create(wo_schema, is_active=True, db=db_session)
 
         db_session.refresh(sample_customer)
         assert sample_customer.is_active is True
 
     def test_create_work_order_deactivates_customer_when_appropriate(
-        self, db_session, sample_customer, sample_work_order_data
+        self, db_session, sample_customer
     ):
+        from schemas.schemas import WorkOrderBase
         sample_customer.is_active = True
         sample_customer.end_date = None
         db_session.commit()
 
-        wo_schema = WorkOrderSchema(**sample_work_order_data)
+        wo_schema = WorkOrderBase(
+            title="Test Work Order",
+            planned_date_begin=datetime.now(timezone.utc) + timedelta(hours=2),
+            planned_date_end=datetime.now(timezone.utc) + timedelta(hours=5),
+            status="new",
+        )
         create(wo_schema, is_active=False, db=db_session)
 
         db_session.refresh(sample_customer)
