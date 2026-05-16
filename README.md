@@ -65,6 +65,7 @@ A production-ready FastAPI application for efficiently managing customers, servi
 ### Option 2: Local Development
 
 - **Python 3.10+** - [Download](https://www.python.org/downloads/)
+- **Poetry** - [Download](https://python-poetry.org/docs/#installation)
 - **PostgreSQL 15+** - [Download](https://www.postgresql.org/download/)
 - **Redis 7.0+** - [Download](https://redis.io/download)
 - **Git** - [Download](https://git-scm.com/downloads)
@@ -99,20 +100,28 @@ git clone git@github.com:JoseJulianMosqueraFuli/enerbit-test.git
 cd enerbit-test
 ```
 
-#### 2. Create Virtual Environment
+#### 2. Install Dependencies with Poetry
 
 ```bash
-python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+poetry install
 ```
 
-#### 3. Install Dependencies
+This creates a virtual environment and installs all dependencies automatically.
+
+To activate the virtual environment:
 
 ```bash
-pip install -r requirements.txt
+poetry shell
 ```
 
-#### 4. Set Up Database
+Or run commands directly with Poetry:
+
+```bash
+poetry run python main.py
+poetry run pytest
+```
+
+#### 3. Set Up Database
 
 Create a PostgreSQL database:
 
@@ -126,7 +135,7 @@ Or using psql:
 CREATE DATABASE service_orders;
 ```
 
-#### 5. Configure Environment Variables
+#### 4. Configure Environment Variables
 
 Copy the example environment file and update with your settings:
 
