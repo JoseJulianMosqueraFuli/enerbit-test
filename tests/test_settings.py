@@ -72,69 +72,81 @@ class TestSettingsValidation:
 
 class TestSettingsDefaults:
     def test_default_app_name(self):
-        settings = Settings(DATABASE_URL="postgresql://test:test@localhost/test")
-        assert settings.APP_NAME == "Service Order Management System"
+        with patch.dict(os.environ, {"DATABASE_URL": "postgresql://test:test@localhost/test"}, clear=False):
+            settings = Settings()
+            assert settings.APP_NAME == "Service Order Management System"
 
     def test_default_app_version(self):
-        settings = Settings(DATABASE_URL="postgresql://test:test@localhost/test")
-        assert settings.APP_VERSION == "1.0.0"
+        with patch.dict(os.environ, {"DATABASE_URL": "postgresql://test:test@localhost/test"}, clear=False):
+            settings = Settings()
+            assert settings.APP_VERSION == "1.0.0"
 
     def test_default_database_url_required(self):
-        with pytest.raises(ValidationError):
-            Settings()
+        with patch.dict(os.environ, {}, clear=True):
+            with pytest.raises(ValidationError):
+                Settings()
 
     def test_default_redis_host(self):
-        settings = Settings(DATABASE_URL="postgresql://test:test@localhost/test")
-        assert settings.REDIS_HOST == "localhost"
+        with patch.dict(os.environ, {"DATABASE_URL": "postgresql://test:test@localhost/test"}, clear=False):
+            settings = Settings()
+            assert settings.REDIS_HOST == "localhost"
 
     def test_default_redis_port(self):
-        settings = Settings(DATABASE_URL="postgresql://test:test@localhost/test")
-        assert settings.REDIS_PORT == 6379
+        with patch.dict(os.environ, {"DATABASE_URL": "postgresql://test:test@localhost/test"}, clear=False):
+            settings = Settings()
+            assert settings.REDIS_PORT == 6379
 
     def test_default_rate_limit(self):
-        settings = Settings(DATABASE_URL="postgresql://test:test@localhost/test")
-        assert settings.RATE_LIMIT_PER_MINUTE == 100
+        with patch.dict(os.environ, {"DATABASE_URL": "postgresql://test:test@localhost/test"}, clear=False):
+            settings = Settings()
+            assert settings.RATE_LIMIT_PER_MINUTE == 100
 
 
 class TestSettingsHelperMethods:
     def test_get_database_url(self):
         url = "postgresql://user:pass@localhost/db"
-        settings = Settings(DATABASE_URL=url)
-        assert settings.get_database_url() == url
+        with patch.dict(os.environ, {"DATABASE_URL": url}, clear=False):
+            settings = Settings()
+            assert settings.get_database_url() == url
 
     def test_get_redis_url(self):
-        settings = Settings(
-            DATABASE_URL="postgresql://test:test@localhost/test",
-            REDIS_HOST="redis.example.com",
-            REDIS_PORT=6380,
-            REDIS_DB=2,
-        )
-        assert settings.get_redis_url() == "redis://redis.example.com:6380/2"
+        with patch.dict(os.environ, {
+            "DATABASE_URL": "postgresql://test:test@localhost/test",
+            "REDIS_HOST": "redis.example.com",
+            "REDIS_PORT": "6380",
+            "REDIS_DB": "2",
+        }, clear=False):
+            settings = Settings()
+            assert settings.get_redis_url() == "redis://redis.example.com:6380/2"
 
     def test_is_production_true(self):
-        settings = Settings(
-            DATABASE_URL="postgresql://test:test@localhost/test",
-            ENVIRONMENT="production",
-        )
-        assert settings.is_production() is True
+        with patch.dict(os.environ, {
+            "DATABASE_URL": "postgresql://test:test@localhost/test",
+            "ENVIRONMENT": "production",
+        }, clear=False):
+            settings = Settings()
+            assert settings.is_production() is True
 
     def test_is_production_false(self):
-        settings = Settings(
-            DATABASE_URL="postgresql://test:test@localhost/test",
-            ENVIRONMENT="development",
-        )
-        assert settings.is_production() is False
+        with patch.dict(os.environ, {
+            "DATABASE_URL": "postgresql://test:test@localhost/test",
+            "ENVIRONMENT": "development",
+        }, clear=False):
+            settings = Settings()
+            assert settings.is_production() is False
 
     def test_is_development_true(self):
-        settings = Settings(
-            DATABASE_URL="postgresql://test:test@localhost/test",
-            ENVIRONMENT="development",
-        )
-        assert settings.is_development() is True
+        with patch.dict(os.environ, {
+            "DATABASE_URL": "postgresql://test:test@localhost/test",
+            "ENVIRONMENT": "development",
+        }, clear=False):
+            settings = Settings()
+            assert settings.is_development() is True
 
     def test_is_development_false(self):
-        settings = Settings(
-            DATABASE_URL="postgresql://test:test@localhost/test",
-            ENVIRONMENT="production",
-        )
-        assert settings.is_development() is False
+        with patch.dict(os.environ, {
+            "DATABASE_URL": "postgresql://test:test@localhost/test",
+            "ENVIRONMENT": "production",
+        }, clear=False):
+            settings = Settings()
+            assert settings.is_development() is False
