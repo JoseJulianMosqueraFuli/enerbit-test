@@ -10,55 +10,58 @@ package-mode = false
 [tool.poetry.dependencies]
 python = ">=3.10,<3.13"
 
-# Core Framework
-fastapi = "0.104.0"
-uvicorn = "0.23.2"
-starlette = ">=0.27.0,<0.28.0"
+# Core Framework (upgraded for security fixes)
+fastapi = ">=0.115.0"
+uvicorn = ">=0.32.0"
+starlette = ">=0.40.0"
 
 # Database
-sqlalchemy = "2.0.22"
-psycopg2-binary = "2.9.9"
-alembic = "^1.12.0"
+sqlalchemy = ">=2.0.36"
+psycopg2-binary = ">=2.9.10"
+alembic = "^1.14.0"
 
 # Redis
-redis = "5.0.1"
+redis = ">=5.2.0"
 
 # Validation and Settings
-pydantic = "2.12.5"
-pydantic-settings = "2.12.0"
+pydantic = ">=2.10.0"
+pydantic-settings = ">=2.6.0"
 
-# Configuration
-python-dotenv = "1.0.0"
+# Configuration (fixed: symlink vulnerability >=1.0.1)
+python-dotenv = ">=1.0.1"
 
-# HTTP and Networking
-httpx = ">=0.24.0,<0.26.0"
+# HTTP and Networking (idna fixed: DoS >=3.7)
+httpx = ">=0.28.0"
+idna = ">=3.10"
 
 # Logging
-python-json-logger = "4.0.0"
+python-json-logger = ">=3.2.0"
 
 # Security and Rate Limiting
-slowapi = "0.1.9"
+slowapi = ">=0.1.9"
 
-# Data Analysis and Visualization
-pandas = "2.3.3"
-numpy = "1.26.1"
-matplotlib = "3.8.0"
-seaborn = "0.13.2"
+# Data Analysis and Visualization (Pillow fixed: multiple vulns >=11.0.0)
+pandas = ">=2.2.0"
+numpy = ">=1.26.0,<2.0.0"
+matplotlib = ">=3.9.0"
+seaborn = ">=0.13.2"
+Pillow = ">=11.0.0"
+fonttools = ">=4.55.0"
 
 [tool.poetry.group.dev.dependencies]
-# Testing
-pytest = "7.4.3"
-pytest-cov = "4.1.0"
-pytest-asyncio = "0.23.2"
-factory-boy = "3.3.0"
-coverage = "7.3.2"
+# Testing (pytest fixed: DoS >=8.0.0)
+pytest = ">=8.3.0"
+pytest-cov = ">=6.0.0"
+pytest-asyncio = ">=0.24.0"
+factory-boy = ">=3.3.0"
+coverage = ">=7.6.0"
 
-# Code Quality Tools
-isort = "5.13.2"
-autoflake = "2.2.1"
-pylint = "3.0.3"
-black = "23.12.1"
-mypy = "1.8.0"
+# Code Quality Tools (black fixed: vulns >=24.0.0)
+isort = ">=5.13.0"
+autoflake = ">=2.3.0"
+pylint = ">=3.3.0"
+black = ">=24.0.0"
+mypy = ">=1.13.0"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -91,10 +94,10 @@ disallow_untyped_defs = false
 [tool.pylint.master]
 max-line-length = 88
 disable = [
-    "C0114",  # missing-module-docstring
-    "C0115",  # missing-class-docstring
-    "C0116",  # missing-function-docstring
-    "R0903",  # too-few-public-methods
+    "C0114",
+    "C0115",
+    "C0116",
+    "R0903",
 ]
 
 [tool.coverage.run]
@@ -102,6 +105,7 @@ source = ["."]
 omit = [
     "tests/*",
     "venv/*",
+    ".venv/*",
     "*/site-packages/*",
     "alembic/*",
 ]

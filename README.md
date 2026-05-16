@@ -551,6 +551,46 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 For support, please open an issue in the GitHub repository or contact the author.
 
+## CI/CD & Security
+
+This project uses GitHub Actions for continuous integration and security scanning:
+
+### Workflows
+
+| Workflow | Description | Triggers |
+|----------|-------------|----------|
+| **CI - Tests & Linting** | Runs tests, linting, and type checking | Push, PR |
+| **Security Scan** | SAST, dependency scanning, secret detection, CodeQL | Push, PR, Weekly |
+| **Docker Security** | Container image scanning, Dockerfile linting | Push, PR, Weekly |
+
+### Security Scans
+
+- **SAST**: Bandit static analysis
+- **Dependencies**: pip-audit + Safety
+- **Secrets**: Gitleaks
+- **Code Analysis**: CodeQL
+- **Containers**: Trivy (filesystem + Docker image)
+- **Dockerfile**: Hadolint
+- **Auto-updates**: Dependabot (weekly)
+
+### Running Security Checks Locally
+
+```bash
+# Install security tools
+poetry run pip install bandit pip-audit safety
+
+# Run SAST scan
+poetry run bandit -r . --exclude venv,.venv,tests,alembic -ll
+
+# Scan dependencies
+poetry export -f requirements.txt --output req.txt --without-hashes --with dev
+poetry run pip-audit -r req.txt
+poetry run safety check -r req.txt
+
+# Scan Dockerfile
+docker run --rm -i hadolint/hadolint < docker/Dockerfile
+```
+
 ---
 
 Made with Python
