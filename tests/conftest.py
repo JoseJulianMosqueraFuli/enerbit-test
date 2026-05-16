@@ -1,18 +1,58 @@
 """Pytest configuration and shared fixtures."""
 
+import os
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Generator
+
+os.environ["SKIP_DB_INIT"] = "true"
+os.environ["DATABASE_URL"] = "sqlite:///./test.db"
+os.environ["ENVIRONMENT"] = "test"
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, String, Boolean, DateTime, TypeDecorator
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from database import Base, get_db
-from main import app
+from database import get_db
 from models import Customer, WorkOrder
+
+
+class GUID(TypeDecorator):
+    """Platform-independent GUID type.
+
+    Uses PostgreSQL's UUID type, otherwise uses String(32),
+    storing as stringified hex values.
+    """
+    impl = String
+    cache_ok = True
+
+    def load_dialect_impl(self, dialect):
+        if dialect.name == "postgresql":
+            from sqlalchemy.dialects.postgresql import UUID
+            return dialect.type_descriptor(UUID())
+        else:
+            return dialect.type_descriptor(String(36))
+
+    def process_bind_param(self, value, dialect):
+        if value is None:
+            return value
+        elif dialect.name == "postgresql":
+            return value
+        else:
+            if not isinstance(value, uuid.UUID):
+                return str(uuid.UUID(value))
+            else:
+                return str(value)
+
+    def process_result_value(self, value, dialect):
+        if value is None:
+            return value
+        else:
+            if not isinstance(value, uuid.UUID):
+                return uuid.UUID(value)
+            return value
 
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
@@ -28,6 +68,9 @@ TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engin
 @pytest.fixture(scope="function")
 def db_session() -> Generator[Session, None, None]:
     """Create a fresh database session for each test."""
+
+    from database import Base
+
     Base.metadata.create_all(bind=engine)
     session = TestingSessionLocal()
     try:
@@ -47,6 +90,7 @@ def client(db_session: Session) -> Generator[TestClient, None, None]:
         finally:
             pass
 
+    from main import app
     app.dependency_overrides[get_db] = override_get_db
     with TestClient(app) as test_client:
         yield test_client
@@ -76,7 +120,7 @@ def sample_customer(db_session: Session, sample_customer_data: dict) -> Customer
 @pytest.fixture
 def sample_work_order_data(sample_customer: Customer) -> dict:
     """Sample work order data for tests."""
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     return {
         "customer_id": str(sample_customer.id),
         "title": "Test Work Order",
@@ -133,7 +177,7 @@ def multiple_work_orders(
 ) -> list:
     """Create multiple work orders in the database."""
     orders = []
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     for i in range(3):
         order = WorkOrder(
             customer_id=sample_customer.id,
