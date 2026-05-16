@@ -60,28 +60,10 @@ def get_orders_within_range_or_by_status(
 @router.get(
     "/{id}", status_code=status.HTTP_200_OK, response_model=schemas.ShowWorkOrder
 )
-def show(id: str, response: Response, db: Session = Depends(get_db)) -> dict:
-    order = db.query(WorkOrder).filter(WorkOrder.id == id).first()
-
-    if not order:
-        response.status_code = status.HTTP_404_NOT_FOUND
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Order with the id {id} is not available",
-        )
-
-    return order
+def show(id: str, db: Session = Depends(get_db)) -> dict:
+    return work_order_repository.show(id, db)
 
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def destroy(id: str, db: Session = Depends(get_db)) -> None:
-    order = db.query(WorkOrder).filter(WorkOrder.id == id)
-
-    if not order.first():
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"The order width id {id} not found",
-        )
-
-    order.delete(synchronize_session=False)
-    db.commit()
+    work_order_repository.destroy(id, db)
