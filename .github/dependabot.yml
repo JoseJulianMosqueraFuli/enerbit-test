@@ -1,7 +1,7 @@
 version: 2
 
 updates:
-  # Python dependencies (Poetry)
+  # Python dependencies (Poetry / pip)
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
@@ -18,6 +18,12 @@ updates:
     commit-message:
       prefix: "deps"
       include: "scope"
+    allow:
+      - dependency-type: "all"
+    ignore:
+      # Skip minor updates for dev tools that don't affect production
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
 
   # GitHub Actions
   - package-ecosystem: "github-actions"
