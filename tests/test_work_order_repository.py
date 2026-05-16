@@ -1,6 +1,7 @@
 """Tests for work order repository."""
 
-from datetime import datetime, timedelta
+import uuid
+from datetime import datetime, timedelta, timezone
 
 import pytest
 from fastapi import HTTPException
@@ -65,7 +66,7 @@ class TestGetAllWorkOrders:
 
 class TestGetAllFromRange:
     def test_get_all_from_range(self, db_session, sample_customer):
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         orders = []
         for i in range(3):
             order = WorkOrder(
@@ -85,7 +86,7 @@ class TestGetAllFromRange:
         assert len(result) >= 1
 
     def test_get_all_from_range_no_results(self, db_session, sample_customer):
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         order = WorkOrder(
             customer_id=sample_customer.id,
             title="Order",
@@ -118,7 +119,7 @@ class TestGetOrdersByStatus:
 
 class TestUpdateWorkOrder:
     def test_update_work_order_success(self, db_session, sample_work_order):
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         updated_data = WorkOrderSchema(
             id=sample_work_order.id,
             customer_id=sample_work_order.customer_id,
@@ -137,9 +138,9 @@ class TestUpdateWorkOrder:
         assert sample_work_order.status == "done"
 
     def test_update_work_order_not_found(self, db_session):
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         updated_data = WorkOrderSchema(
-            id=sample_work_order.id if 'sample_work_order' in dir() else uuid.uuid4(),
+            id=uuid.uuid4(),
             customer_id=uuid.uuid4(),
             title="Updated",
             planned_date_begin=now,

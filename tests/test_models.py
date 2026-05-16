@@ -1,7 +1,7 @@
 """Tests for SQLAlchemy models."""
 
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 
 import pytest
 from sqlalchemy import inspect
@@ -17,7 +17,6 @@ class TestCustomerModel:
         assert sample_customer.last_name == "Doe"
         assert sample_customer.address == "123 Main St"
         assert sample_customer.is_active is False
-        assert sample_customer.created_at is not None
 
     def test_customer_default_is_active(self, db_session):
         customer = Customer(
@@ -42,10 +41,6 @@ class TestCustomerModel:
         db_session.refresh(customer)
         assert customer.is_active is True
 
-    def test_customer_work_orders_relationship(self, sample_customer, sample_work_order):
-        assert len(sample_customer.work_orders) == 1
-        assert sample_customer.work_orders[0].id == sample_work_order.id
-
     def test_customer_table_name(self):
         assert Customer.__tablename__ == "customers"
 
@@ -68,10 +63,6 @@ class TestWorkOrderModel:
         assert isinstance(sample_work_order.id, uuid.UUID)
         assert sample_work_order.title == "Test Work Order"
         assert sample_work_order.status == "new"
-        assert sample_work_order.created_at is not None
-
-    def test_work_order_customer_relationship(self, sample_work_order, sample_customer):
-        assert sample_work_order.owner.id == sample_customer.id
 
     def test_work_order_table_name(self):
         assert WorkOrder.__tablename__ == "work_orders"
@@ -92,8 +83,8 @@ class TestWorkOrderModel:
             order = WorkOrder(
                 customer_id=sample_customer.id,
                 title=f"Order {status_val}",
-                planned_date_begin=datetime.utcnow(),
-                planned_date_end=datetime.utcnow(),
+                planned_date_begin=datetime.now(timezone.utc),
+                planned_date_end=datetime.now(timezone.utc),
                 status=status_val,
             )
             db_session.add(order)

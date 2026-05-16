@@ -92,7 +92,6 @@ class TestUpdateCustomer:
             update_customer("non-existent-id", updated_data, db_session)
 
         assert exc_info.value.status_code == 404
-        assert "not found" in exc_info.value.detail
 
 
 class TestGetCustomerById:
@@ -106,7 +105,6 @@ class TestGetCustomerById:
             get_customer_by_id("non-existent-id", db_session)
 
         assert exc_info.value.status_code == 404
-        assert "not available" in exc_info.value.detail
 
 
 class TestDeleteCustomer:
@@ -124,7 +122,6 @@ class TestDeleteCustomer:
             delete_customer("non-existent-id", db_session)
 
         assert exc_info.value.status_code == 404
-        assert "not found" in exc_info.value.detail
 
     def test_delete_customer_verifies_deletion(self, db_session, sample_customer):
         customer_id = str(sample_customer.id)

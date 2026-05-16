@@ -1,6 +1,7 @@
 """Tests for analytics repository."""
 
-from datetime import datetime, timedelta
+import uuid
+from datetime import datetime, timedelta, timezone
 
 from models import Customer, WorkOrder
 from repositories.analytics_repository import (
@@ -17,7 +18,7 @@ class TestCalculateAverageDuration:
         assert result is None
 
     def test_average_duration_with_completed_orders(self, db_session, sample_customer):
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         order1 = WorkOrder(
             customer_id=sample_customer.id,
             title="Order 1",
@@ -39,7 +40,7 @@ class TestCalculateAverageDuration:
         assert result is not None
 
     def test_average_duration_excludes_non_completed(self, db_session, sample_customer):
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         done_order = WorkOrder(
             customer_id=sample_customer.id,
             title="Done Order",
@@ -75,7 +76,7 @@ class TestOrderFrequencyPerCustomer:
         assert result[0][1] == 3
 
     def test_order_frequency_multiple_customers(self, db_session, multiple_customers):
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         for customer in multiple_customers[:3]:
             for i in range(2):
                 order = WorkOrder(
@@ -98,7 +99,7 @@ class TestIdentifyCustomerActivityPeriods:
         assert result == []
 
     def test_activity_periods_with_orders(self, db_session, sample_customer):
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         for i in range(3):
             order = WorkOrder(
                 customer_id=sample_customer.id,
@@ -117,13 +118,13 @@ class TestIdentifyCustomerActivityPeriods:
 
 class TestCountActiveCustomers:
     def test_count_active_customers_empty(self, db_session):
-        start = datetime.utcnow() - timedelta(days=30)
-        end = datetime.utcnow()
+        start = datetime.now(timezone.utc) - timedelta(days=30)
+        end = datetime.now(timezone.utc)
         result = count_active_customers(db_session, start, end)
         assert result == 0
 
     def test_count_active_customers(self, db_session):
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         active_customer = Customer(
             first_name="Active",
             last_name="User",
@@ -147,7 +148,7 @@ class TestCountActiveCustomers:
         assert result == 1
 
     def test_count_active_customers_outside_range(self, db_session):
-        old_date = datetime.utcnow() - timedelta(days=365)
+        old_date = datetime.now(timezone.utc) - timedelta(days=365)
         active_customer = Customer(
             first_name="Old",
             last_name="User",
@@ -158,7 +159,7 @@ class TestCountActiveCustomers:
         db_session.add(active_customer)
         db_session.commit()
 
-        start = datetime.utcnow() - timedelta(days=30)
-        end = datetime.utcnow()
+        start = datetime.now(timezone.utc) - timedelta(days=30)
+        end = datetime.now(timezone.utc)
         result = count_active_customers(db_session, start, end)
         assert result == 0
