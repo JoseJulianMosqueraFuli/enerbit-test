@@ -1,0 +1,161 @@
+name: CI - Tests & Linting
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  # ============================================================
+  # Linting & Code Quality
+  # ============================================================
+  lint:
+    name: Lint & Code Quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Poetry
+        run: pip install poetry
+
+      - name: Install dependencies
+        run: poetry install --with dev
+
+      - name: Run Black (check formatting)
+        run: poetry run black --check .
+
+      - name: Run isort (check imports)
+        run: poetry run isort --check-only --diff .
+
+      - name: Run Flake8
+        run: |
+          poetry run pip install flake8
+          poetry run flake8 . \
+            --max-line-length=88 \
+            --extend-exclude=venv,.venv,alembic \
+            --ignore=E501,W503,E203
+
+      - name: Run Pylint
+        run: |
+          poetry run pylint \
+            --rcfile=pyproject.toml \
+            --disable=C0114,C0115,C0116,R0903 \
+            *.py models/ repositories/ routers/ schemas/ tasks/ \
+            || true
+
+  # ============================================================
+  # Type Checking
+  # ============================================================
+  type-check:
+    name: Type Check (mypy)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Poetry
+        run: pip install poetry
+
+      - name: Install dependencies
+        run: poetry install --with dev
+
+      - name: Run mypy
+        run: |
+          poetry run mypy \
+            --ignore-missing-imports \
+            --no-strict-optional \
+            *.py models/ repositories/ routers/ schemas/ tasks/ \
+            || true
+
+  # ============================================================
+  # Tests
+  # ============================================================
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Poetry
+        run: pip install poetry
+
+      - name: Install dependencies
+        run: poetry install --with dev
+
+      - name: Run tests with coverage
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test_db
+          ENVIRONMENT: test
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
+          SKIP_DB_INIT: "true"
+        run: |
+          poetry run pytest \
+            tests/ \
+            -v \
+            --cov=. \
+            --cov-report=xml \
+            --cov-report=term-missing \
+            --no-cov-on-fail
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage.xml
+          fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: coverage.xml
+          retention-days: 15

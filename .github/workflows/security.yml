@@ -1,0 +1,246 @@
+name: Security Scan
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Run every Monday at 8:00 UTC
+    - cron: "0 8 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
+jobs:
+  # ============================================================
+  # SAST - Static Application Security Testing
+  # ============================================================
+  sast-bandit:
+    name: SAST - Bandit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Bandit
+        run: pip install bandit
+
+      - name: Run Bandit SAST scan
+        run: |
+          bandit -r . \
+            -f json \
+            -o bandit-results.json \
+            --exclude venv,.venv,tests,alembic \
+            -ll \
+            || true
+
+      - name: Upload Bandit results
+        uses: actions/upload-artifact@v4
+        with:
+          name: bandit-results
+          path: bandit-results.json
+          retention-days: 30
+
+      - name: Run Bandit (fail on high severity)
+        run: |
+          bandit -r . \
+            --exclude venv,.venv,tests,alembic \
+            -ll \
+            -ii
+
+  # ============================================================
+  # Dependency Scanning - pip-audit
+  # ============================================================
+  deps-pip-audit:
+    name: Dependency Scan - pip-audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install pip-audit
+        run: pip install pip-audit
+
+      - name: Export dependencies from Poetry
+        run: |
+          pip install poetry
+          poetry export -f requirements.txt --output requirements-export.txt --without-hashes --with dev
+
+      - name: Run pip-audit
+        run: |
+          pip-audit \
+            -r requirements-export.txt \
+            --format json \
+            --output pip-audit-results.json \
+            || true
+
+      - name: Upload pip-audit results
+        uses: actions/upload-artifact@v4
+        with:
+          name: pip-audit-results
+          path: pip-audit-results.json
+          retention-days: 30
+
+      - name: Run pip-audit (fail on vulnerabilities)
+        run: |
+          pip-audit -r requirements-export.txt
+
+  # ============================================================
+  # Dependency Scanning - Safety
+  # ============================================================
+  deps-safety:
+    name: Dependency Scan - Safety
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Poetry and export dependencies
+        run: |
+          pip install poetry
+          poetry export -f requirements.txt --output requirements-export.txt --without-hashes --with dev
+
+      - name: Run Safety check
+        uses: pyupio/safety-action@v1
+        with:
+          api-key: ${{ secrets.SAFETY_API_KEY || '' }}
+          requirements-file: requirements-export.txt
+
+  # ============================================================
+  # Secret Scanning - Gitleaks
+  # ============================================================
+  secrets-gitleaks:
+    name: Secret Scan - Gitleaks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+
+  # ============================================================
+  # CodeQL Analysis
+  # ============================================================
+  codeql:
+    name: CodeQL Analysis
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ["python"]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          queries: security-extended
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{ matrix.language }}"
+
+  # ============================================================
+  # Trivy - Filesystem & Config Scanning
+  # ============================================================
+  trivy-fs:
+    name: Trivy - Filesystem Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner (filesystem)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: "fs"
+          scan-ref: "."
+          format: "sarif"
+          output: "trivy-fs-results.sarif"
+          exit-code: "1"
+          severity: "CRITICAL,HIGH"
+          skip-dirs: "venv,.venv,.git"
+
+      - name: Upload Trivy filesystem results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: "trivy-fs-results.sarif"
+
+  # ============================================================
+  # Trivy - Dockerfile Scanning
+  # ============================================================
+  trivy-dockerfile:
+    name: Trivy - Dockerfile Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner (Dockerfile)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: "config"
+          scan-ref: "docker/"
+          format: "sarif"
+          output: "trivy-dockerfile-results.sarif"
+          exit-code: "1"
+          severity: "CRITICAL,HIGH"
+
+      - name: Upload Trivy Dockerfile results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: "trivy-dockerfile-results.sarif"
+
+  # ============================================================
+  # Dependency Review (PR only)
+  # ============================================================
+  dependency-review:
+    name: Dependency Review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
+          deny-licenses: GPL-3.0, AGPL-3.0
