@@ -1,0 +1,6 @@
+failure-threshold: warning
+format: sarif
+ignored:
+  - DL3008  # Pin versions in apt get install
+  - DL3059  # Multiple consecutive RUN instructions
+  - SC2015  # Note on using &&/||

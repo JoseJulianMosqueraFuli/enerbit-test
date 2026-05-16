@@ -6,6 +6,8 @@
 [![Redis](https://img.shields.io/badge/Redis-7.0-DC382D.svg?style=flat&logo=redis&logoColor=white)](https://redis.io)
 [![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.0-red.svg?style=flat)](https://www.sqlalchemy.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![CI](https://github.com/JoseJulianMosqueraFuli/enerbit-test/actions/workflows/ci.yml/badge.svg)](https://github.com/JoseJulianMosqueraFuli/enerbit-test/actions/workflows/ci.yml)
+[![Security](https://github.com/JoseJulianMosqueraFuli/enerbit-test/actions/workflows/security.yml/badge.svg)](https://github.com/JoseJulianMosqueraFuli/enerbit-test/actions/workflows/security.yml)
 
 A production-ready FastAPI application for efficiently managing customers, service orders, and analytics. Built with modern Python practices, comprehensive error handling, structured logging, and enterprise-grade security.
 

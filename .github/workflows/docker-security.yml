@@ -1,0 +1,148 @@
+name: Docker Security Scan
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docker/**"
+      - "Dockerfile"
+      - "pyproject.toml"
+      - "poetry.lock"
+  pull_request:
+    branches: [main]
+    paths:
+      - "docker/**"
+      - "Dockerfile"
+      - "pyproject.toml"
+      - "poetry.lock"
+  schedule:
+    # Run every Monday at 9:00 UTC
+    - cron: "0 9 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  # ============================================================
+  # Build Docker Image
+  # ============================================================
+  build:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    outputs:
+      image-tag: ${{ steps.meta.outputs.tags }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: enerbit-app
+          tags: |
+            type=sha,prefix=
+            type=ref,event=branch
+            type=ref,event=pr
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/Dockerfile
+          push: false
+          load: true
+          tags: ${{ steps.meta.outputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ============================================================
+  # Trivy - Docker Image Scan
+  # ============================================================
+  trivy-image:
+    name: Trivy - Docker Image Scan
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/Dockerfile
+          push: false
+          load: true
+          tags: enerbit-app:scan
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Run Trivy vulnerability scanner (image)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: "enerbit-app:scan"
+          format: "sarif"
+          output: "trivy-image-results.sarif"
+          exit-code: "1"
+          severity: "CRITICAL,HIGH"
+          ignore-unfixed: true
+
+      - name: Upload Trivy image results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: "trivy-image-results.sarif"
+
+  # ============================================================
+  # Hadolint - Dockerfile Linting
+  # ============================================================
+  hadolint:
+    name: Hadolint - Dockerfile Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Hadolint
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: docker/Dockerfile
+          failure-threshold: warning
+          format: sarif
+          output-file: hadolint-results.sarif
+
+      - name: Upload Hadolint results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: hadolint-results.sarif
+
+  # ============================================================
+  # Docker Compose Config Validation
+  # ============================================================
+  compose-validate:
+    name: Docker Compose Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate docker-compose.yml
+        run: |
+          cd docker
+          docker compose config --quiet && echo "✅ docker-compose.yml is valid"
+
+      - name: Validate docker-compose.prod.yml
+        run: |
+          cd docker
+          docker compose -f docker-compose.yml -f docker-compose.prod.yml config --quiet && \
+          echo "✅ docker-compose.prod.yml is valid"

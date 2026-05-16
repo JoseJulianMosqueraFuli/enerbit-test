@@ -1,0 +1,6 @@
+# Trivy ignore file
+# https://aquasecurity.github.io/trivy/latest/docs/configuration/filtering/
+
+# CVEs with no fix available or low impact
+# Add CVE IDs here as needed
+# Example: CVE-2024-1234
