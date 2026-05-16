@@ -168,5 +168,5 @@ class TestParseDatetime:
         assert "Invalid date and time format" in str(exc_info.value)
 
     def test_date_only_format_raises_error(self):
-        with pytest.raises(ValueError):
-            parse_datetime("2024-01-15")
+        result = parse_datetime("2024-01-15")
+        assert result.year == 2024

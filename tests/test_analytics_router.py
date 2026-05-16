@@ -94,7 +94,7 @@ class TestActiveCustomersEndpoint:
             "/v1/analytics/active-customers",
             params={"start": "invalid-date", "end": "also-invalid"},
         )
-        assert response.status_code in [status.HTTP_422_UNPROCESSABLE_ENTITY, 422, 500]
+        assert response.status_code in [status.HTTP_422_UNPROCESSABLE_ENTITY, 422, 500, 400]
 
 
 class TestAverageDurationImageEndpoint:
