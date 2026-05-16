@@ -54,7 +54,7 @@ def get_active_customer(db: Session) -> list:
     Returns:
         list: List of active customers
     """
-    customers = db.query(Customer).filter(Customer.is_active == True).all()
+    customers = db.query(Customer).filter(Customer.is_active.is_(True)).all()
     return customers
 
 
@@ -77,7 +77,7 @@ def update_customer(id: str, request: schemas.Customer, db: Session) -> dict:
     if not customer.first():
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"The customer width id {id} not found",
+            detail=f"The customer with id {id} not found",
         )
 
     customer.update(
@@ -135,9 +135,9 @@ def delete_customer(id: str, db: Session) -> dict:
     if not customer.first():
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"The customer width id {id} not found",
+            detail=f"The customer with id {id} not found",
         )
 
     customer.delete(synchronize_session=False)
     db.commit()
-    return {"message": f"The customer {id} has been deleted sucessfully"}
+    return {"message": f"The customer {id} has been deleted successfully"}

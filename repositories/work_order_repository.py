@@ -4,7 +4,7 @@ This module contains all database operations related to work orders.
 """
 
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
@@ -33,7 +33,7 @@ def create(request: schemas.WorkOrder, is_active: bool, db: Session) -> WorkOrde
         customer = db.query(Customer).filter(Customer.id == request.customer_id)
 
         if customer.first().is_active and is_active is False:
-            customer.update({"is_active": is_active, "end_date": datetime.now()})
+            customer.update({"is_active": is_active, "end_date": datetime.now(timezone.utc)})
 
     new_order = WorkOrder(
         customer_id=request.customer_id,
@@ -114,7 +114,7 @@ def update(id: str, request: schemas.WorkOrder, db: Session) -> dict:
     if not order.first():
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"The order width id {id} not found",
+            detail=f"The order with id {id} not found",
         )
 
     order.update(
@@ -149,7 +149,7 @@ def finish(id: str, db: Session) -> dict:
     if not order.first():
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"The order width id {id} not found",
+            detail=f"The order with id {id} not found",
         )
 
     total_ended_orders = (
@@ -163,7 +163,7 @@ def finish(id: str, db: Session) -> dict:
 
     if total_ended_orders == 0:
         customer = db.query(Customer).filter(Customer.id == order.first().customer_id)
-        customer.update({"is_active": True, "start_date": datetime.now()})
+        customer.update({"is_active": True, "start_date": datetime.now(timezone.utc)})
 
     order.update({"status": "done"})
 
@@ -230,9 +230,9 @@ def destroy(id: str, db: Session) -> dict:
     if not order.first():
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"The order width id {id} not found",
+            detail=f"The order with id {id} not found",
         )
 
     order.delete(synchronize_session=False)
     db.commit()
-    return {"message": f"The order {id} has been deleted sucessfully"}
+    return {"message": f"The order {id} has been deleted successfully"}
