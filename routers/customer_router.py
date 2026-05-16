@@ -15,7 +15,7 @@ from schemas import schemas
 router = APIRouter(prefix="/v1/customers", tags=["Customers"])
 
 
-@router.post("/", status_code=status.HTTP_201_CREATED)
+@router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.Customer)
 def create(request: schemas.Customer, db: Session = Depends(get_db)) -> dict:
     return customer_repository.create_customer(request, db)
 
