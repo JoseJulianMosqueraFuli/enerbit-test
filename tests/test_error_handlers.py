@@ -103,7 +103,8 @@ class TestNotFoundErrorHandler:
 
         assert isinstance(response, JSONResponse)
         assert response.status_code == status.HTTP_404_NOT_FOUND
-        data = response.json()
+        import json
+        data = json.loads(response.body)
         assert data["resource"] == "Customer"
         assert data["identifier"] == "123"
 
@@ -117,7 +118,8 @@ class TestGenericExceptionHandler:
 
         assert isinstance(response, JSONResponse)
         assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
-        data = response.json()
+        import json
+        data = json.loads(response.body)
         assert "detail" in data
 
 

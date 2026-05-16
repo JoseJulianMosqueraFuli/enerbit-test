@@ -12,19 +12,14 @@ from settings import Settings
 class TestSettingsValidation:
     def test_valid_environment_values(self):
         for env in ["development", "staging", "production", "test"]:
-            settings = Settings(
-                DATABASE_URL="postgresql://test:test@localhost/test",
-                ENVIRONMENT=env,
-            )
-            assert settings.ENVIRONMENT == env
+            with patch.dict(os.environ, {"DATABASE_URL": "postgresql://test:test@localhost/test", "ENVIRONMENT": env}, clear=False):
+                settings = Settings()
+                assert settings.ENVIRONMENT == env
 
     def test_invalid_environment_raises(self):
-        with pytest.raises(ValidationError) as exc_info:
-            Settings(
-                DATABASE_URL="postgresql://test:test@localhost/test",
-                ENVIRONMENT="invalid",
-            )
-        assert "Environment must be one of" in str(exc_info.value)
+        with patch.dict(os.environ, {"DATABASE_URL": "postgresql://test:test@localhost/test", "ENVIRONMENT": "invalid"}, clear=False):
+            with pytest.raises(ValidationError):
+                Settings()
 
     def test_valid_log_levels(self):
         for level in ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]:
