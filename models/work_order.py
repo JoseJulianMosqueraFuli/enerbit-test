@@ -4,7 +4,7 @@ This module defines the WorkOrder SQLAlchemy model.
 """
 
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 
 from sqlalchemy import DateTime, Enum, ForeignKey, String
@@ -32,7 +32,7 @@ class WorkOrder(Base):
         Enum("new", "done", "cancelled", name="status_enum")
     )
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=datetime.utcnow
+        DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
     )
 
     owner: Mapped["Customer"] = relationship(

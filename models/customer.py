@@ -4,7 +4,7 @@ This module defines the Customer SQLAlchemy model.
 """
 
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Optional
 
 from sqlalchemy import Boolean, DateTime, String
@@ -27,7 +27,7 @@ class Customer(Base):
     end_date: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=datetime.utcnow
+        DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
     )
 
     work_orders: Mapped[List["WorkOrder"]] = relationship(
