@@ -1,6 +1,6 @@
 # Multi-stage Dockerfile for FastAPI application
 # Stage 1: Builder - Install dependencies with Poetry
-FROM python:3.11-slim as builder
+FROM python:3.14-slim as builder
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
@@ -22,7 +22,7 @@ RUN poetry export -f requirements.txt --output requirements.txt --without-hashes
     && pip install --no-cache-dir --user -r requirements.txt
 
 # Stage 2: Runtime - Minimal production image
-FROM python:3.11-slim
+FROM python:3.14-slim
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
